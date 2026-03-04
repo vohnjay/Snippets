@@ -1,8 +1,7 @@
+
 //
 //  SnippetsApp.swift
 //  Snippets
-//
-//  Created by DeVohn Jackson on 3/3/26.
 //
 
 import SwiftUI
@@ -12,9 +11,25 @@ import SwiftData
 struct SnippetsApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            ClipItem.self,
+            ClipFolder.self,
+            ClipTag.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        // Use App Group container so the Share Extension can access the same store
+        let storeURL: URL = {
+            if let groupURL = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: "group.com.devohn.snippets"
+            ) {
+                return groupURL.appendingPathComponent("Snippets.store")
+            }
+            return URL.documentsDirectory.appendingPathComponent("Snippets.store")
+        }()
+
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            url: storeURL
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
